@@ -1,25 +1,26 @@
-import 'package:client_app/AllScreens/mainscreen.dart';
-import 'package:client_app/AllScreens/splashScreen.dart';
-import 'package:client_app/AllScreens/userOption.dart';
-import 'package:client_app/AllScreens/userSignup.dart';
+import 'package:client_app/AllScreens/loginScreen.dart';
 import 'package:client_app/AllWidgets/progressDialog.dart';
-import 'package:client_app/auth_service.dart';
 import 'package:client_app/selectUser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class LoginScreen extends StatelessWidget {
-   LoginScreen({super.key});
+import 'mainscreen.dart';
 
-  static const String idScreen ="login";
 
+class UserSignup extends StatelessWidget {
+   UserSignup({super.key});
+  static const String idScreen ="usersignup";
+
+  TextEditingController nameTextEditingController = TextEditingController();
   TextEditingController emailTextEditingController = TextEditingController();
   TextEditingController passwordTextEditingController = TextEditingController();
-  @override
+   TextEditingController phoneTextEditingController = TextEditingController();
+   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -27,48 +28,102 @@ class LoginScreen extends StatelessWidget {
           padding: const EdgeInsets.all(0.0),
           child: Column(
             children: [
-               SizedBox(height: screenHeight*0.1,),
-              const Center(
-                child: Image(
-                    image: AssetImage("images/MECHANIX.png"),
-                    width: 250,
-                    height: 100,
-                    alignment: Alignment.center,
-                ),
-              ),
-              const SizedBox(height: 10,),
+              SizedBox(height: screenHeight*0.1,),
               const Text(
-                "Sign In",
+                "Create Account",
                 style: TextStyle(fontSize: 28,fontFamily: "Brand Bold"),
                 textAlign: TextAlign.center,
               ),
               Container(
                 margin: EdgeInsets.only(left: 0,top: 10,right: 0,bottom: 10),
+                padding: EdgeInsets.symmetric(vertical: 0,horizontal: 50),
                 child: const Text(
-                    "Hi welcome back",
-                    style: TextStyle(fontSize: 14,fontFamily: "Brand-Regular"),
-                    textAlign: TextAlign.center,
+                  "Fill your information before or rgister with your social account",
+                  style: TextStyle(color: Colors.grey,fontSize: 14,fontFamily: "Brand-Regular"),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Container(
-                padding: EdgeInsets.only(left: 50,top: 0,right: 50,bottom: 0),
+                padding: EdgeInsets.only(left: 40,top: 0,right: 40,bottom: 0),
                 child:  Column(
                   children: [
                     const SizedBox(height: 5,),
-                     const Row(
-                       mainAxisAlignment: MainAxisAlignment.start,
-                       children: [
-                         const Text(
-                          "Email",
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Name",
                           style: TextStyle(color: Colors.grey,fontSize: 16,fontFamily: "Brand Bold"),
+                        ),
+                      ],
                     ),
-                       ],
-                     ),
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey, width: 3)
+                          border: Border.all(color: Colors.grey, width: 3)
+                      ),
+                      child:  TextField(
+                        controller: nameTextEditingController,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 0),
+                          border: InputBorder.none,
+                          hintText: "Enter Full Name",
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: TextStyle(fontSize: 14,),
+                      ),
+                    ),
+                    const SizedBox(height: 5,),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Phone",
+                          style: TextStyle(color: Colors.grey,fontSize: 16,fontFamily: "Brand Bold"),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey, width: 3)
+                      ),
+                      child: TextField(
+                        controller: phoneTextEditingController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 0),
+                          border: InputBorder.none,
+                          hintText: "Enter Phone number",
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: TextStyle(fontSize: 14,),
+                      ),
+                    ),
+                    const SizedBox(height: 5,),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Email",
+                          style: TextStyle(color: Colors.grey,fontSize: 16,fontFamily: "Brand Bold"),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey, width: 3)
                       ),
                       child:  TextField(
                         controller: emailTextEditingController,
@@ -122,15 +177,24 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        AgreetoTerms(),
+                        const Text(
+                          "Agree With",
+                          style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 12,
+                              fontFamily: "Brand-Regular"
+                          ),
+                        ),
                         TextButton(
                             onPressed: (){},
                             child: const Text(
-                              "Forgot password?",
+                              "Terms & Condition",
                               style: TextStyle(
                                   color: Colors.purpleAccent,
-                                  fontSize: 16,
+                                  fontSize: 12,
                                   fontFamily: "Brand Bold"
                               ),
                             ))
@@ -139,25 +203,31 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 5,),
                     TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          padding: EdgeInsets.symmetric(vertical: 10,horizontal: 100),
+                            backgroundColor: Colors.deepPurple,
+                            padding: EdgeInsets.symmetric(vertical: 10,horizontal: 100),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                         ),
                         onPressed: (){
-                          if(!emailTextEditingController.text.contains("@")){
+                         // Navigator.pushNamedAndRemoveUntil(context, MainScreen.idScreen, (route) => false);
+                          if(nameTextEditingController.text.length < 3){
+                            displayToastMessage("name must be atleast 3 Characters.", context);
+                          }
+                          else if(!emailTextEditingController.text.contains("@")){
                             displayToastMessage("Email address is not valid", context);
                           }
-                          else if(passwordTextEditingController.text.isEmpty){
-                            displayToastMessage("Password is mandatory.", context);
+                          else if(phoneTextEditingController.text.isEmpty){
+                            displayToastMessage("Phone number is mandatory", context);
+                          }
+                          else if(passwordTextEditingController.text.length < 6){
+                            displayToastMessage("Password must be atleast 6 Characters.", context);
                           }
                           else{
-                            loginAndAuthenticateUser(context);
-
+                            registerNewUser(context);
                           }
 
                         },
-                        child: Text('Sign In',
-                        style: TextStyle( color:Colors.white, fontSize: 16))),
+                        child: Text('Sign Up',
+                            style: TextStyle( color:Colors.white, fontSize: 16))),
                     const SizedBox(height: 20,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -215,7 +285,7 @@ class LoginScreen extends StatelessWidget {
                             height: 50,
                             child: GestureDetector(
                               onTap: (){
-                                AuthService().signInWithGoogle(context);
+                                //AuthService().signInWithGoogle();
                               },
                               child: Image(
                                 image: AssetImage("images/google-logo.png"),
@@ -243,13 +313,13 @@ class LoginScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(height: 20,),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          "Don't have an account?",
+                          "Already have an account?",
                           style: TextStyle(
                               color: Colors.black54,
                               fontSize: 12,
@@ -258,11 +328,11 @@ class LoginScreen extends StatelessWidget {
                         ),
                         TextButton(
                             onPressed: (){
-                              Navigator.pushNamedAndRemoveUntil(context,  UserSignup.idScreen, (route) => false);
+                              Navigator.pushNamedAndRemoveUntil(context,  LoginScreen.idScreen, (route) => false);
 
                             },
                             child: const Text(
-                              "Sign Up",
+                              "Sign In",
                               style: TextStyle(
                                   color: Colors.purpleAccent,
                                   fontSize: 12,
@@ -270,21 +340,7 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ))
                       ],
-                    ),
-                    TextButton(
-                        onPressed: (){
-                          //Navigator.pushNamedAndRemoveUntil(context, SplashScreen.idScreen, (route) => true);
-
-                        },
-                        child: const Text(
-                          "Go back to selection page",
-                          style: TextStyle(
-                              color: Colors.purpleAccent,
-                              fontSize: 10,
-                              fontFamily: "Brand Bold"
-                          ),
-                        ))
-
+                    )
                   ],
                 ),
               )
@@ -294,50 +350,68 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
    late BuildContext dialogContext;
-   void loginAndAuthenticateUser(BuildContext context) async{
+  registerNewUser(BuildContext context) async{
 
-     showDialog(
-         context: context,
-         barrierDismissible: false,
-         builder: (BuildContext context){
-           dialogContext = context;
-           return ProgressDialog(message: "Authenticating, Please wait...",);
-         });
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context){
+          dialogContext = context;
+          return ProgressDialog(message: "Creating new account...",);
+        });
 
-    final User? firebaseUser = (await _firebaseAuth
-        .signInWithEmailAndPassword(
-        email: emailTextEditingController.text,
-        password: passwordTextEditingController.text
-    ).catchError((errmsg){
+     final User? firebaseUser = (await _firebaseAuth
+     .createUserWithEmailAndPassword(
+         email: emailTextEditingController.text,
+         password: passwordTextEditingController.text
+     ).catchError((errmsg){
+       Navigator.pop(dialogContext);
 
-      Navigator.pop(dialogContext);
-      displayToastMessage("Some thing went wrong", context);
-    })).user;
-    if(firebaseUser != null){
+       displayToastMessage("Error:" + errmsg.toString(), context);
+     })).user;
+     if(firebaseUser != null){
 
+       Map userDataMap = {
+         "name": nameTextEditingController.text.trim(),
+         "email": emailTextEditingController.text.trim(),
+         "phone": phoneTextEditingController.text.trim(),
+       };
 
-      userRef.child(firebaseUser.uid).once().then((event){
-        final snap = event.snapshot;
-        if(snap.value != null){
-          Navigator.pop(dialogContext);
-          Navigator.pushNamedAndRemoveUntil(context, MainScreen.idScreen, (route) => false);
-        }
-        else{
-          Navigator.pop(dialogContext);
-          _firebaseAuth.signOut();
-          displayToastMessage("Now record exists for this user. Please create new account", context);
+       userRef.child(firebaseUser.uid).set(userDataMap);
+        Navigator.pop(dialogContext);
+        Navigator.pushNamedAndRemoveUntil(context, LoginScreen.idScreen, (route) => false);
 
-        }
+     }
+     else{
+       Navigator.pop(dialogContext);
+       displayToastMessage("New user account has not been Created.", context);
+     }
+  }
+}
+
+displayToastMessage(String msg, BuildContext context){
+  Fluttertoast.showToast(msg: msg);
+}
+
+class AgreetoTerms extends StatefulWidget {
+  const AgreetoTerms({super.key});
+
+  @override
+  State<AgreetoTerms> createState() => _AgreetoTermsState();
+}
+
+class _AgreetoTermsState extends State<AgreetoTerms> {
+  bool agree = false;
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(value: agree, onChanged:(bool? value){
+      setState(() {
+        agree = value!;
       });
-     // Navigator.pushNamedAndRemoveUntil(context, MainScreen.idScreen, (route) => false);
 
-    }
-    else{
-      Navigator.pop(dialogContext);
-      displayToastMessage("Error occured can not be signed in.", context);
-    }
+    });
   }
 }
 
