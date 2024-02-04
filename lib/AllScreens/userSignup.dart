@@ -377,6 +377,7 @@ class UserSignup extends StatelessWidget {
          "name": nameTextEditingController.text.trim(),
          "email": emailTextEditingController.text.trim(),
          "phone": phoneTextEditingController.text.trim(),
+         "id": firebaseUser.uid.toString()
        };
 
        userRef.child(firebaseUser.uid).set(userDataMap);

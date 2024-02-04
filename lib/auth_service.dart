@@ -60,6 +60,7 @@ class AuthService{
             "name": FirebaseAuth.instance.currentUser!.displayName,
             "email": FirebaseAuth.instance.currentUser!.email,
             "phone": "N/A",
+            "id": FirebaseAuth.instance.currentUser!.uid
           };
 
           userRef.child(FirebaseAuth.instance.currentUser!.uid).set(userDataMap);

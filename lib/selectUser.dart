@@ -1,4 +1,6 @@
+import 'package:client_app/AllScreens/AfterAccept.dart';
 import 'package:client_app/AllScreens/ServiceScreen.dart';
+import 'package:client_app/AllScreens/reached_dis_user.dart';
 import 'package:client_app/AllScreens/requestService.dart';
 import 'package:client_app/AllScreens/splashScreen.dart';
 import 'package:client_app/auth_service.dart';
@@ -36,8 +38,8 @@ class SelectUser extends StatelessWidget {
         OptionScreen.idScreen: (context) => OptionScreen(),
         LoginScreen.idScreen: (context) => LoginScreen(),
         MainScreen.idScreen: (context) => MainScreen(),
-
-
+        AfterAccept.idScreen:(context) => AfterAccept(),
+        Reached_dis_user.idScreen:(context) => Reached_dis_user()
       },
       debugShowCheckedModeBanner: false,
       //home: AuthService().handleAuthState(),

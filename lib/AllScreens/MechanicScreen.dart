@@ -6,10 +6,15 @@ import 'package:client_app/AllScreens/requestAccept.dart';
 import 'package:client_app/AllScreens/requestService.dart';
 import 'package:client_app/AllWidgets/dialogbox.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
+import '../AllWidgets/detailsbox.dart';
 import '../auth_service.dart';
 import '../selectMechanic.dart';
+
+DatabaseReference UpdateReqRef = FirebaseDatabase.instance.ref().child("updateRequest");
+
 
 class MechanicScreen extends StatefulWidget {
   const MechanicScreen({super.key});
@@ -23,12 +28,14 @@ class MechanicScreen extends StatefulWidget {
 class _MechanicScreenState extends State<MechanicScreen> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+  late String uid;
+
 
 
   @override
   Widget build(BuildContext context) {
 
-    String uid = _firebaseAuth.currentUser!.uid.toString();
+    uid = _firebaseAuth.currentUser!.uid.toString();
     String currentEmail = _firebaseAuth.currentUser!.email.toString();
     return StreamBuilder(
         stream: MechanicRef.child(uid).onValue,
@@ -196,7 +203,8 @@ class _MechanicScreenState extends State<MechanicScreen> {
                             Column(
                               children: [
                             for(final li in list)...[
-                                Container(
+                              if(li['status']=="unaccepted")...[
+                              Container(
                                   width: double.infinity,
                                   //height: 40,
                                   margin: EdgeInsets.symmetric(
@@ -319,32 +327,68 @@ class _MechanicScreenState extends State<MechanicScreen> {
                                             ],
                                           ),
 
-                                          Container(
-                                            height: 35,
-                                            child: TextButton(
-                                                style: TextButton
-                                                    .styleFrom(
-                                                    backgroundColor: Colors
-                                                        .pink,
-                                                    //padding: EdgeInsets.symmetric(vertical: 0,horizontal: 5),
-                                                    shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius
-                                                            .all(
-                                                            Radius
-                                                                .circular(
-                                                                8)))
-                                                ),
-                                                onPressed: () {
-                                                  //Navigator.pushNamedAndRemoveUntil(context, RequestAccept.idScreen, (route) => false,arguments: {'rid': li['uid']});
-                                                    updateRequest(li['uid']);
-                                                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestAccept(rid: li['uid'])));
-                                                },
-                                                child: Text(
-                                                    'Accept',
-                                                    style: TextStyle(
-                                                        color: Colors
-                                                            .white,
-                                                        fontSize: 12))),
+                                          Column(
+                                            children: [
+                                              Container(
+                                                height: 35,
+                                                child: TextButton(
+                                                    style: TextButton
+                                                        .styleFrom(
+                                                        backgroundColor: Colors
+                                                            .pink,
+                                                        //padding: EdgeInsets.symmetric(vertical: 0,horizontal: 5),
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius
+                                                                .all(
+                                                                Radius
+                                                                    .circular(
+                                                                    8)))
+                                                    ),
+                                                    onPressed: () {
+                                                      showDialog(
+                                                          context: context,
+                                                          barrierDismissible: false,
+                                                          builder: (BuildContext context){
+                                                            dialogContext = context;
+                                                            return Detailsbox(type: li["vehicleType"],vDetails: li["vehicleDetails"], problem: li["problem"]);
+                                                          });
+                                                    },
+                                                    child: Text(
+                                                        'Details',
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white,
+                                                            fontSize: 12))),
+                                              ),
+                                              SizedBox(height: 10,),
+                                              Container(
+                                                height: 35,
+                                                child: TextButton(
+                                                    style: TextButton
+                                                        .styleFrom(
+                                                        backgroundColor: Colors
+                                                            .pink,
+                                                        //padding: EdgeInsets.symmetric(vertical: 0,horizontal: 5),
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius
+                                                                .all(
+                                                                Radius
+                                                                    .circular(
+                                                                    8)))
+                                                    ),
+                                                    onPressed: () {
+                                                      //Navigator.pushNamedAndRemoveUntil(context, RequestAccept.idScreen, (route) => false,arguments: {'rid': li['uid']});
+                                                      updateRequest(li['uid']);
+                                                      Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestAccept(rid: li['uid'])));
+                                                    },
+                                                    child: Text(
+                                                        'Accept',
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white,
+                                                            fontSize: 12))),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       )
@@ -352,6 +396,7 @@ class _MechanicScreenState extends State<MechanicScreen> {
                                   ),
                                 ),
                                 ],
+                                      ]
                               ],
                             );
                             }  else {
@@ -423,11 +468,15 @@ class _MechanicScreenState extends State<MechanicScreen> {
           });
     });
   }
-  updateRequest(uid) async{
+  updateRequest(ruid) async{
 
 
-    RequestsRef.child(uid).update({
+    RequestsRef.child(ruid).update({
       "status": "accepted",
+    });
+
+    MechanicRef.child(uid).update({
+      "status": "occupied",
     });
   }
 }

@@ -196,7 +196,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
         children: [
           GoogleMap(
               mapType: MapType.normal,
-              myLocationButtonEnabled: true,
+              myLocationButtonEnabled: false,
               initialCameraPosition: _kGooglePlex,
               myLocationEnabled: true,
               zoomGesturesEnabled: true,
@@ -207,7 +207,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                 _controllerGoogleMap.complete(controller);
                 newGoogleMapController = controller;
 
-
+                locatePosition();
 
               },
           ),
@@ -424,7 +424,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                       list= map.values.toList();
 
                                       for(final mech in list){
-                                        loadmarkers(mech);
+                                        if(mech['status']=="unoccupied") {
+                                          loadmarkers(mech);
+                                        }
                                       }
 
                                       if(mechanicMarker != "Null"){
@@ -432,7 +434,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                           Column(
                                             children: [
                                               for(final li in list)...[
-                                                if(li['phone']==mechanicMarker)...[
+                                                if(li['phone']==mechanicMarker && li['status']=="unoccupied")...[
                                                 Container(
                                                   width: double.infinity,
                                                   //height: 40,
@@ -553,6 +555,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                         return Column(
                                           children: [
                                             for(final li in list)...[
+                                             if(li['status']=="unoccupied")...[
                                               GestureDetector(
                                                 onTap: (){
                                                   //print(li["name"]);
@@ -565,7 +568,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                   polylineCoordinates.clear();
                                                   polylineId = li['phone'].toString();
                                                   _getPolyline(double.parse(li['lat']), double.parse(li['lng']));
-
+                                                  getDistance(double.parse(li['lat']), double.parse(li['lng']));
                                                 },
                                                 child: Container(
                                                   width: double.infinity,
@@ -657,29 +660,13 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                               ),
                                                             ],
                                                           ),
-
+                                                          SizedBox(width: 14,),
                                                           Container(
 
-                                                            child: TextButton(
-                                                                style: TextButton
-                                                                    .styleFrom(
-                                                                    backgroundColor: Colors
-                                                                        .deepPurple,
-                                                                    //padding: EdgeInsets.symmetric(vertical: 0,horizontal: 5),
-                                                                    shape: RoundedRectangleBorder(
-                                                                        borderRadius: BorderRadius
-                                                                            .all(
-                                                                            Radius
-                                                                                .circular(
-                                                                                8)))
-                                                                ),
-                                                                onPressed: () {},
-                                                                child: Text(
-                                                                    'Request',
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize: 12))),
+                                                            child: Flexible(child: Text("Tap on it or tap on the pin to send request",style: TextStyle(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 10))),
                                                           ),
                                                         ],
                                                       )
@@ -687,6 +674,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
                                                   ),
                                                 ),
                                               )
+                                                      ]
                                             ],
                                           ],
                                         );

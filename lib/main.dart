@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mechanix Client App',
+      title: 'Mechanix',
       theme: ThemeData(
         fontFamily: "Brand Bold",
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

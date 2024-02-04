@@ -7,11 +7,13 @@ import 'package:client_app/AllScreens/reached_dis.dart';
 import 'package:client_app/AllScreens/requestService.dart';
 import 'package:client_app/Api/getLocation.dart';
 import 'package:client_app/configMaps.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../selectMechanic.dart';
 import 'mainscreen.dart';
@@ -111,15 +113,17 @@ class _RequestAcceptState extends State<RequestAccept> {
     timer = Timer.periodic(Duration (seconds: 1), (timer) {
       polylineCoordinates.clear();
      locatePosition();
-      // setState(() {
-      //
-      // });
+
+     if(flag =="RequestSet"){
+       updatePositonOnDatabase();
+     }
 
       if(0.05>(double.parse(distanceInKm))){
         stopTimer();
 
       }
 
+      checkCancel();
 
     });
   }
@@ -127,7 +131,24 @@ class _RequestAcceptState extends State<RequestAccept> {
   void stopTimer(){
     timer?.cancel();
     print("--------reached________");
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>Reached_dis()));
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>Reached_dis(reqid: rid,upreqid: uuid)));
+  }
+
+  void checkCancel() async{
+    RequestsRef.child(rid).once().then((event){
+      final snap = event.snapshot;
+      if(snap.value != null){
+        Map<dynamic,dynamic> checkmap= snap.value as Map<dynamic,dynamic>;
+        if(checkmap['status']=="canceled"){
+          timer?.cancel();
+          updateRequest();
+          Navigator.pushNamedAndRemoveUntil(context, MechanicScreen.idScreen, (route) => false);
+        }
+      }
+      else{
+        print("error");
+      }
+    });
   }
 
 
@@ -248,6 +269,49 @@ class _RequestAcceptState extends State<RequestAccept> {
       });
 
   }
+  late String uuid;
+  late String uid;
+  String flag ="RequestNotSet";
+
+  void updateReq() async{
+    uid = FirebaseAuth.instance.currentUser!.uid.toString();
+
+
+    uuid = Uuid().v4();
+
+    MechanicRef.child(uid).once().then((event){
+      final snap = event.snapshot;
+      Map<dynamic,dynamic> mechmap= snap.value as Map<dynamic,dynamic>;
+      if(snap.value != null){
+
+        Map UpadtereqDataMap = {
+          "mechanic": mechmap?['name'].toString(),
+          "contact": mechmap?['phone'].toString(),
+          "email": mechmap?['email'].toString(),
+          "lat": originlat.toString(),
+          "lng": originlng.toString(),
+          "req_id": rid,
+          "id": uuid,
+          "status":"ongoing"
+        };
+
+        UpdateReqRef.child(uuid).set(UpadtereqDataMap);
+
+        flag = "RequestSet";
+      }
+      else{
+        print("error");
+      }
+    });
+
+  }
+
+  void updatePositonOnDatabase() async{
+    UpdateReqRef.child(uuid).update({
+      "lat": originlat.toString(),
+      "lng": originlng.toString(),
+    });
+  }
 
   void getlines() async{
 
@@ -293,7 +357,7 @@ class _RequestAcceptState extends State<RequestAccept> {
               newGoogleMapController = controller;
 
               startTimer();
-
+              updateReq();
             },
           ),
           Positioned(
@@ -562,7 +626,9 @@ class _RequestAcceptState extends State<RequestAccept> {
                                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                                                   ),
                                                   onPressed: (){
-                                                    print('oressed');
+                                                    timer?.cancel();
+                                                    updateRequest();
+                                                    Navigator.pushNamedAndRemoveUntil(context, MechanicScreen.idScreen, (route) => false);
 
                                                   },
                                                   child: Text('cancel',
@@ -619,5 +685,13 @@ class _RequestAcceptState extends State<RequestAccept> {
         ),
       ),
     );
+  }
+  updateRequest() async{
+
+    RequestsRef.child(rid).remove();
+    UpdateReqRef.child(uuid).remove();
+    MechanicRef.child(uid).update({
+      "status": "unoccupied",
+    });
   }
 }

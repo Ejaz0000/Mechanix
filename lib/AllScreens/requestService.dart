@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:client_app/AllWidgets/requestbox.dart';
 import 'package:client_app/selectUser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +10,7 @@ import  'package:intl/intl.dart';
 
 
 import '../selectMechanic.dart';
+import 'AfterAccept.dart';
 
 DatabaseReference RequestsRef = FirebaseDatabase.instance.ref().child("requests");
 
@@ -37,6 +40,7 @@ class _RequestServiceState extends State<RequestService> {
   ];
 
   String uuid = Uuid().v4();
+  Timer? timer;
 
   //@override
   // void initState() async{
@@ -465,7 +469,7 @@ class _RequestServiceState extends State<RequestService> {
     );
   }
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  late BuildContext dialogContext;
   requestSend(BuildContext context) async{
     String cdate = DateFormat("yyyy-MM-dd").format(DateTime.now());
     String tdata = DateFormat("HH:mm:ss").format(DateTime.now());
@@ -490,7 +494,8 @@ class _RequestServiceState extends State<RequestService> {
                 "uid": uuid,
                 "status": "unaccepted",
                 "lat": userlat,
-                "lng": userlng
+                "lng": userlng,
+                "charge": fare.toString(),
               };
 
 
@@ -500,8 +505,11 @@ class _RequestServiceState extends State<RequestService> {
                   context: context,
                   barrierDismissible: false,
                   builder: (BuildContext context){
+                    dialogContext = context;
                     return Requestbox(RId: uuid,);
                   });
+
+             startTimer();
 
             }
             else{
@@ -511,6 +519,28 @@ class _RequestServiceState extends State<RequestService> {
 
 
 
+
+  }
+  void startTimer(){
+    timer = Timer.periodic(Duration (seconds: 1), (timer) {
+        RequestsRef.child(uuid).once().then((event){
+          final snap = event.snapshot;
+          if(snap.value != null){
+            Map<dynamic,dynamic> checkmap= snap.value as Map<dynamic,dynamic>;
+            if(checkmap['status']=="accepted"){
+              stopTimer();
+              // Navigator.pushNamedAndRemoveUntil(context, MechanicScreen.idScreen, (route) => false);
+            }
+          }
+        });
+
+    });
+  }
+
+  void stopTimer(){
+    timer?.cancel();
+    Navigator.pop(dialogContext);
+    Navigator.pushNamedAndRemoveUntil(context, AfterAccept.idScreen, (route) => true, arguments: {'reqid': uuid,});
 
   }
 }

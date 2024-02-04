@@ -379,6 +379,8 @@ class MechanicSignup extends StatelessWidget {
          "location": "N/A",
          "lat": "N/A",
          "lng": "N/A",
+         "status": "unoccupied",
+         "id": firebaseMechanic.uid.toString()
        };
 
        MechanicRef.child(firebaseMechanic.uid).set(mechanicDataMap);
